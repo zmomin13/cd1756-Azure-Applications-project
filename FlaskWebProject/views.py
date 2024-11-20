@@ -1,10 +1,6 @@
-"""
-Routes and views for the flask application.
-"""
-
 from datetime import datetime
 from flask import render_template, flash, redirect, request, session, url_for
-from urllib.parse import urlparse, urljoin
+from werkzeug.urls import url_parse
 from config import Config
 from FlaskWebProject import app, db
 from FlaskWebProject.forms import LoginForm, PostForm
@@ -12,7 +8,6 @@ from flask_login import current_user, login_user, logout_user, login_required
 from FlaskWebProject.models import User, Post
 import msal
 import uuid
-import logging
 
 imageSourceUrl = 'https://'+ app.config['BLOB_ACCOUNT']  + '.blob.core.windows.net/' + app.config['BLOB_CONTAINER']  + '/'
 
@@ -67,13 +62,11 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            app.logger.warning(f"Failed login attempt for username: {form.username.data}")
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
-        app.logger.info(f"User {form.username.data} logged in successfully.")
         next_page = request.args.get('next')
-        if not next_page or urlparse(next_page).netloc != '':
+        if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         return redirect(next_page)
     session["state"] = str(uuid.uuid4())
@@ -103,9 +96,10 @@ def authorized():
 @app.route('/logout')
 def logout():
     logout_user()
-    app.logger.info("User logged out successfully.")
     if session.get("user"): # Used MS Login
+        # Wipe out user and its token cache from session
         session.clear()
+        # Also logout from your tenant's web session
         return redirect(
             Config.AUTHORITY + "/oauth2/v2.0/logout" +
             "?post_logout_redirect_uri=" + url_for("login", _external=True))
@@ -130,5 +124,5 @@ def _build_msal_app(cache=None, authority=None):
 def _build_auth_url(authority=None, scopes=None, state=None):
     return _build_msal_app(authority=authority).get_authorization_request_url(
         scopes or [],
-        state=state or str(uuid.uuid4()),
+        state=state,
         redirect_uri=url_for('authorized', _external=True))
