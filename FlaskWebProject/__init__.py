@@ -12,9 +12,9 @@ app.config.from_object(Config)
 app.debug = True
 
 # Configure logging
-logging.basicConfig(filename='app.log', level=logging.INFO,
+logging.basicConfig(filename='app.log', level=logging.DEBUG,  # Change to DEBUG level
                     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
-app.logger.setLevel(logging.INFO)
+app.logger.setLevel(logging.DEBUG)
 
 Session(app)
 db = SQLAlchemy(app)
