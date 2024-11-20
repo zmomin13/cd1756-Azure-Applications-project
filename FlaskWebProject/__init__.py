@@ -8,6 +8,9 @@ from flask_session import Session
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Enable debug mode
+app.debug = True
+
 # Configure logging
 logging.basicConfig(filename='app.log', level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
@@ -28,4 +31,4 @@ def log_successful_login(sender, user):
 def log_failed_login(sender, user, **extra):
     app.logger.warning(f"Failed login attempt for user {user.id if user else 'unknown'}.")
 
-import FlaskWebProject.view
+import FlaskWebProject.views
