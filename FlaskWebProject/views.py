@@ -39,7 +39,7 @@ def new_post():
     )
 
 
-@app.route('/post/', methods=['GET', 'POST'])
+@app.route('/post/<int:id>', methods=['GET', 'POST'])
 @login_required
 def post(id):
     post = Post.query.get(int(id))
