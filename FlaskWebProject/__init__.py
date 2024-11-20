@@ -10,7 +10,12 @@ from flask_session import Session
 
 app = Flask(__name__)
 app.config.from_object(Config)
-# TODO: Add any logging levels and handlers with app.logger
+
+# Configure logging
+logging.basicConfig(filename='app.log', level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+app.logger.setLevel(logging.INFO)
+
 Session(app)
 db = SQLAlchemy(app)
 login = LoginManager(app)
